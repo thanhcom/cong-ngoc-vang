@@ -30,7 +30,7 @@ export default function Slide() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden h-[200px] md:h-[280px] bg-red-700 text-yellow-300">
+    <section className="relative overflow-hidden h-[150px] md:h-[220px] bg-red-700 text-yellow-300">
       {slidesData.map((s, i) => (
         <div
           key={i}

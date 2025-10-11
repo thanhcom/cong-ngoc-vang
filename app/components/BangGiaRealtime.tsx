@@ -88,7 +88,7 @@ export default function BangGiaRealtime() {
         </h3>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white shadow-xl rounded-xl overflow-hidden text-base md:text-lg">
-            <thead className="bg-red-700 text-white text-lg md:text-xl font-bold">
+            <thead className="bg-red-700 text-white text-lg md:text-3xl font-bold">
               <tr>
                 <th className="py-4 px-6">Loại vàng</th>
                 <th className="py-4 px-6">Mua vào</th>
@@ -96,18 +96,34 @@ export default function BangGiaRealtime() {
                 <th className="py-4 px-6">Cập nhật</th>
               </tr>
             </thead>
-            <tbody className="text-gray-900 font-semibold">
+            <tbody>
               {bangGia.map((row) => (
-                <tr key={row.id} className="border-b hover:bg-yellow-100">
-                  <td className="py-4 px-6">{row.loai_vang}</td>
-                  <td className="py-4 px-6">
+                <tr
+                  key={row.id}
+                  className="border-b transition-colors duration-500 hover:bg-yellow-200"
+                >
+                  {/* Loại vàng */}
+                  <td className="py-5 px-6 text-red-900 text-3xl md:text-3xl font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
+                    {row.loai_vang}
+                  </td>
+
+                  {/* Mua vào */}
+                  <td className="py-5 px-6 text-red-900 text-3xl md:text-3xl font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
                     {row.mua_vao.toLocaleString("vi-VN")} {row.don_vi}
                   </td>
-                  <td className="py-4 px-6">
+
+                  {/* Bán ra */}
+                  <td className="py-5 px-6 text-red-900 text-3xl md:text-3xl font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
                     {row.ban_ra.toLocaleString("vi-VN")} {row.don_vi}
                   </td>
+
+                  {/* Cập nhật với nhấp nháy khi update */}
                   <td
-                    className="py-4 px-6 text-yellow-400 hover:text-yellow-600 transition cursor-default"
+                    className={`py-5 px-6 text-yellow-400 text-3xl md:text-3xl font-extrabold tracking-wide shadow-md transition-colors duration-500 hover:text-yellow-600 cursor-default ${
+                      new Date(row.updated_at).getTime() > Date.now() - 5000
+                        ? "animate-pulse"
+                        : ""
+                    }`}
                     title={new Date(row.updated_at).toLocaleString()}
                   >
                     {timeAgo(row.updated_at)}
