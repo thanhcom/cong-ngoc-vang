@@ -84,7 +84,15 @@ export default function BangGiaRealtime() {
     <section className="py-12 md:py-16 bg-yellow-50">
       <div className="container mx-auto px-4 md:px-12 text-center">
         <h3 className="text-3xl md:text-4xl font-extrabold text-red-700 mb-8">
-          Bảng giá vàng hôm nay
+          Bảng giá vàng hôm nay –{" "}
+          <span className="text-yellow-800">
+            {new Date().toLocaleDateString("vi-VN", {
+              weekday: "long",
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
+          </span>
         </h3>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white shadow-xl rounded-xl overflow-hidden text-base md:text-lg">
@@ -97,42 +105,40 @@ export default function BangGiaRealtime() {
               </tr>
             </thead>
             <tbody>
-  {bangGia.map((row) => (
-    <tr
-      key={row.id}
-      className="border-b transition-colors duration-500 hover:bg-yellow-200"
-    >
-      {/* Loại vàng */}
-      <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
-        {row.loai_vang}
-      </td>
+              {bangGia.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b transition-colors duration-500 hover:bg-yellow-200"
+                >
+                  {/* Loại vàng */}
+                  <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
+                    {row.loai_vang}
+                  </td>
 
-      {/* Mua vào */}
-      <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
-        {row.mua_vao.toLocaleString("vi-VN")} {row.don_vi}
-      </td>
+                  {/* Mua vào */}
+                  <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
+                    {row.mua_vao.toLocaleString("vi-VN")} {row.don_vi}
+                  </td>
 
-      {/* Bán ra */}
-      <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
-        {row.ban_ra.toLocaleString("vi-VN")} {row.don_vi}
-      </td>
+                  {/* Bán ra */}
+                  <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
+                    {row.ban_ra.toLocaleString("vi-VN")} {row.don_vi}
+                  </td>
 
-      {/* Cập nhật */}
-      <td
-        className={`py-3 px-4 text-lg md:text-3xl text-yellow-400 font-extrabold tracking-wide shadow-md transition-colors duration-500 hover:text-yellow-600 cursor-default ${
-          new Date(row.updated_at).getTime() > Date.now() - 5000
-            ? "animate-pulse"
-            : ""
-        }`}
-        title={new Date(row.updated_at).toLocaleString()}
-      >
-        {timeAgo(row.updated_at)}
-      </td>
-    </tr>
-  ))}
-</tbody>
-
-
+                  {/* Cập nhật */}
+                  <td
+                    className={`py-3 px-4 text-lg md:text-3xl text-yellow-400 font-extrabold tracking-wide shadow-md transition-colors duration-500 hover:text-yellow-600 cursor-default ${
+                      new Date(row.updated_at).getTime() > Date.now() - 5000
+                        ? "animate-pulse"
+                        : ""
+                    }`}
+                    title={new Date(row.updated_at).toLocaleString()}
+                  >
+                    {timeAgo(row.updated_at)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
       </div>
