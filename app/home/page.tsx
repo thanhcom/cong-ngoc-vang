@@ -16,8 +16,26 @@ interface GiaVang {
   updated_at: string;
 }
 
+// Hàm tính "time ago" kiểu Facebook
+function timeAgo(dateString: string) {
+  const now = new Date();
+  const updated = new Date(dateString);
+  const diff = Math.floor((now.getTime() - updated.getTime()) / 1000); // tính giây
+
+  if (diff < 60) return `${diff} giây trước`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+
+  const days = Math.floor(diff / 86400);
+  if (days < 7) return `${days} ngày trước`;
+  if (days < 30) return `${Math.floor(days / 7)} tuần trước`;
+  if (days < 365) return `${Math.floor(days / 30)} tháng trước`;
+  return `${Math.floor(days / 365)} năm trước`;
+}
+
 export default function Home() {
   const [bangGia, setBangGia] = useState<GiaVang[]>([]);
+  const [timeNow, setTimeNow] = useState<Date>(new Date());
 
   // Lấy dữ liệu ban đầu
   useEffect(() => {
@@ -31,7 +49,7 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Lắng nghe realtime
+  // Lắng nghe realtime Supabase
   useEffect(() => {
     const channel = supabase
       .channel("realtime:bang_gia_vang")
@@ -53,9 +71,16 @@ export default function Home() {
         }
       )
       .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
+  }, []);
+
+  // Auto update thời gian mỗi giây
+  useEffect(() => {
+    const interval = setInterval(() => setTimeNow(new Date()), 1000);
+    return () => clearInterval(interval);
   }, []);
 
   // Slide auto chạy
@@ -126,33 +151,26 @@ export default function Home() {
         <div className="absolute inset-0">
           {[
             {
-              //img: "https://images.unsplash.com/photo-1611223514449-6885a3805b9f",
               title: "Tinh tế – Uy tín – Chất lượng",
               desc: "Vàng Bạc Công Ngọc – Niềm tin vững chắc của mọi nhà",
             },
             {
-              //img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f",
               title: "Trang sức sang trọng",
               desc: "Mang đến vẻ đẹp tinh khôi và quý phái cho phái đẹp",
             },
             {
-              //img: "https://images.unsplash.com/photo-1603808033192-082d6919d3f7",
               title: "Đẳng cấp và tinh xảo",
               desc: "Mỗi sản phẩm là một tác phẩm nghệ thuật độc đáo",
             },
           ].map((s, i) => (
             <div
               key={i}
-              className={`slide ${
-                i === 0 ? "active-slide" : ""
-              } bg-cover bg-center`}
+              className={`slide ${i === 0 ? "active-slide" : ""} bg-cover bg-center`}
               style={{ backgroundImage: `url('${s.img}')` }}
             >
               <div className="bg-black/40 w-full h-full absolute inset-0"></div>
               <div className="relative z-10 text-center px-4 md:px-10">
-                <h2 className="text-3xl md:text-5xl font-bold mb-3">
-                  {s.title}
-                </h2>
+                <h2 className="text-3xl md:text-5xl font-bold mb-3">{s.title}</h2>
                 <p className="text-base md:text-lg mb-6">{s.desc}</p>
                 {i === 0 && (
                   <a
@@ -181,7 +199,7 @@ export default function Home() {
         </button>
       </section>
 
-      {/* Bảng giá động từ Supabase */}
+      {/* Bảng giá */}
       <section className="py-12 md:py-16 bg-yellow-50">
         <div className="container mx-auto px-4 md:px-12 text-center">
           <h3 className="text-3xl md:text-4xl font-extrabold text-red-700 mb-8">
@@ -207,8 +225,11 @@ export default function Home() {
                     <td className="py-4 px-6">
                       {row.ban_ra.toLocaleString("vi-VN")} {row.don_vi}
                     </td>
-                    <td className="py-4 px-6">
-                      {new Date(row.updated_at).toLocaleDateString("vi-VN")}
+                    <td
+                      className="py-4 px-6 text-yellow-400 hover:text-yellow-600 transition cursor-default"
+                      title={new Date(row.updated_at).toLocaleString()}
+                    >
+                      {timeAgo(row.updated_at)}
                     </td>
                   </tr>
                 ))}

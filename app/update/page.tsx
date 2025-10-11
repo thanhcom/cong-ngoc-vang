@@ -12,6 +12,20 @@ interface BangGia {
   updated_at?: string;
 }
 
+// Hàm tính time ago kiểu Facebook
+function timeAgo(dateString: string) {
+  const now = new Date();
+  const past = new Date(dateString);
+  const diff = (now.getTime() - past.getTime()) / 1000; // giây
+
+  if (diff < 60) return `${Math.floor(diff)} giây trước`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+  if (diff < 2592000) return `${Math.floor(diff / 86400)} ngày trước`;
+  if (diff < 31104000) return `${Math.floor(diff / 2592000)} tháng trước`;
+  return `${Math.floor(diff / 31104000)} năm trước`;
+}
+
 export default function BangGiaVangManager() {
   const [rows, setRows] = useState<BangGia[]>([]);
   const [formData, setFormData] = useState<BangGia>({
@@ -21,6 +35,7 @@ export default function BangGiaVangManager() {
     don_vi: "VNĐ/chỉ",
   });
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [, setTick] = useState(0); // dùng để rerender mỗi giây
 
   // 🔹 Load dữ liệu + realtime
   useEffect(() => {
@@ -38,6 +53,14 @@ export default function BangGiaVangManager() {
     return () => {
       supabase.removeChannel(channel);
     };
+  }, []);
+
+  // 🔹 Timer để rerender mỗi giây
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadData = async () => {
@@ -59,11 +82,14 @@ export default function BangGiaVangManager() {
           mua_vao: formData.mua_vao,
           ban_ra: formData.ban_ra,
           don_vi: formData.don_vi,
+          updated_at: new Date().toISOString(),
         })
         .eq("id", editingId);
       setEditingId(null);
     } else {
-      await supabase.from("bang_gia_vang").insert([formData]);
+      await supabase
+        .from("bang_gia_vang")
+        .insert([{ ...formData, updated_at: new Date().toISOString() }]);
     }
 
     setFormData({ loai_vang: "", mua_vao: 0, ban_ra: 0, don_vi: "VNĐ/chỉ" });
@@ -172,8 +198,8 @@ export default function BangGiaVangManager() {
                 <td className="py-2 px-4 text-gray-700">
                   {r.ban_ra.toLocaleString()} {r.don_vi}
                 </td>
-                <td className="py-2 px-4 text-sm text-gray-500">
-                  {new Date(r.updated_at!).toLocaleString("vi-VN")}
+                <td className="py-2 px-4 text-sm text-yellow-500 font-semibold">
+                  {r.updated_at ? timeAgo(r.updated_at) : "-"}
                 </td>
                 <td className="py-2 px-4 space-x-2">
                   <button
