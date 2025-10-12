@@ -22,7 +22,7 @@ export default function Header() {
             Sản phẩm
           </Link>
           <Link href="/history" className="hover:text-white transition">
-            Lịch Sử
+            Lịch sử
           </Link>
           <Link href="/info" className="hover:text-white transition">
             Liên hệ
