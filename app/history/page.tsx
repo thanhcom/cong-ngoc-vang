@@ -4,8 +4,8 @@ import Slide from "../components/Slide";
 import LichSuGiaVang from "../components/LichSuGiaVang";
 
 export const metadata = {
-  title: "Vàng Bạc Công Ngọc - Trang chủ",
-  description: "Khám phá bộ sưu tập hình ảnh vàng bạc, nhẫn, dây chuyền… chất lượng cao tại Hải Phòng.",
+  title: "Vàng Bạc Công Ngọc - Lịch sử giá vàng",
+  description: "Khám phá lịch sử biến động giá vàng tại Công Ngọc.",
 };
 
 export default function HomePage() {

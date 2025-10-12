@@ -27,6 +27,11 @@ function timeAgo(dateString: string) {
 }
 
 export default function BangGiaVangManager() {
+    useEffect(() => {
+    document.title = "💎 Quản lý Bảng giá vàng - Công Ngọc";
+  }, []);
+
+
   const [rows, setRows] = useState<BangGia[]>([]);
   const [formData, setFormData] = useState<BangGia>({
     loai_vang: "",
@@ -70,7 +75,7 @@ export default function BangGiaVangManager() {
       .order("updated_at", { ascending: false });
     setRows(data || []);
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

@@ -5,7 +5,20 @@ import BangGiaRealtime from "../components/BangGiaRealtime";
 
 export const metadata = {
   title: "Vàng Bạc Công Ngọc - Trang chủ",
-  description: "Khám phá bộ sưu tập hình ảnh vàng bạc, nhẫn, dây chuyền… chất lượng cao tại Hải Phòng.",
+  description:
+    "Vàng Bạc Công Ngọc cung cấp nhẫn, dây chuyền, vòng tay… chất lượng cao, uy tín tại Hải Phòng.",
+  openGraph: {
+    title: "Thông tin Vàng Bạc Công Ngọc",
+    description: "Sản phẩm vàng bạc chất lượng cao, uy tín tại Hải Phòng.",
+    url: "https://yourdomain.com/info",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 800,
+        height: 600,
+      },
+    ],
+  },
 };
 
 export default function HomePage() {
