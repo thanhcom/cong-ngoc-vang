@@ -27,7 +27,8 @@ export default function LichSuGiaVang() {
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState<"24h" | "7d" | "30d">("7d");
 
-  // 🟡 Lấy danh sách loại vàng, chọn mặc định cái đầu tiên
+  // ... (các phần code khác không thay đổi)
+
   useEffect(() => {
     const fetchDanhSachVang = async () => {
       const { data, error } = await supabase
@@ -43,14 +44,13 @@ export default function LichSuGiaVang() {
       if (data && data.length > 0) {
         const list = [...new Set(data.map((d) => d.loai_vang))];
         setDanhSachVang(list);
-        setLoaiVang(list[0]); // 👉 chọn mặc định cái đầu tiên
+        setLoaiVang(list[0]);
       }
     };
 
     fetchDanhSachVang();
   }, []);
 
-  // 🟢 Hàm fetch lịch sử có memo hóa để tránh re-render vô ích
   const fetchLichSu = useCallback(
     async (loai: string) => {
       setLoading(true);
@@ -80,7 +80,6 @@ export default function LichSuGiaVang() {
     [range]
   );
 
-  // 🟣 Tự động gọi khi đổi loại vàng hoặc range
   useEffect(() => {
     if (loaiVang) fetchLichSu(loaiVang);
   }, [loaiVang, range, fetchLichSu]);
@@ -146,11 +145,12 @@ export default function LichSuGiaVang() {
               }
             />
             <YAxis />
+            {/* ✨ SỬA LỖI Ở ĐÂY ✨ */}
             <Tooltip
               labelFormatter={(v) => new Date(v).toLocaleString("vi-VN")}
               formatter={(value: number, name: string) => [
                 value.toLocaleString("vi-VN") + " VNĐ/Chỉ",
-                name === "mua_vao" ? "Mua vào" : "Bán ra",
+                name, // Chỉ cần trả về `name` là đủ, không cần điều kiện
               ]}
             />
             <Line
@@ -158,14 +158,14 @@ export default function LichSuGiaVang() {
               dataKey="mua_vao"
               stroke="#f59e0b"
               strokeWidth={3}
-              name="Mua vào"
+              name="Mua vào" // `name` này sẽ được truyền vào formatter
             />
             <Line
               type="monotone"
               dataKey="ban_ra"
               stroke="#ef4444"
               strokeWidth={3}
-              name="Bán ra"
+              name="Bán ra" // `name` này sẽ được truyền vào formatter
             />
           </LineChart>
         </ResponsiveContainer>
