@@ -27,6 +27,7 @@ function timeAgo(dateString: string) {
 }
 
 export default function BangGiaVangManager() {
+  // Đổi title trang
     useEffect(() => {
     document.title = "💎 Quản lý Bảng giá vàng - Công Ngọc";
   }, []);
