@@ -32,7 +32,7 @@ export default function BangGiaVangManager() {
     loai_vang: "",
     mua_vao: 0,
     ban_ra: 0,
-    don_vi: "VNĐ/chỉ",
+    don_vi: "Nghìn VNĐ/chỉ",
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [, setTick] = useState(0); // dùng để rerender mỗi giây
@@ -92,7 +92,7 @@ export default function BangGiaVangManager() {
         .insert([{ ...formData, updated_at: new Date().toISOString() }]);
     }
 
-    setFormData({ loai_vang: "", mua_vao: 0, ban_ra: 0, don_vi: "VNĐ/chỉ" });
+    setFormData({ loai_vang: "", mua_vao: 0, ban_ra: 0, don_vi: "Nghìn VNĐ/chỉ" });
   };
 
   const handleEdit = (row: BangGia) => {
@@ -161,7 +161,7 @@ export default function BangGiaVangManager() {
 
         <button
           type="submit"
-          className={`w-full py-2 font-bold rounded-lg transition ${
+          className={`w-full py-2 font-bold rounded-lg transition cursor-pointer ${
             editingId
               ? "bg-red-600 hover:bg-red-700 text-white"
               : "bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white"
@@ -201,16 +201,16 @@ export default function BangGiaVangManager() {
                 <td className="py-2 px-4 text-sm text-yellow-500 font-semibold">
                   {r.updated_at ? timeAgo(r.updated_at) : "-"}
                 </td>
-                <td className="py-2 px-4 space-x-2">
+                <td className="py-2 px-4 flex justify-center space-x-2">
                   <button
                     onClick={() => handleEdit(r)}
-                    className="text-red-600 hover:text-red-800 font-semibold"
+                    className="text-red-600 font-semibold cursor-pointer"
                   >
                     ✏️ Sửa
                   </button>
                   <button
                     onClick={() => handleDelete(r.id!)}
-                    className="text-gray-500 hover:text-red-600 font-semibold"
+                    className="text-gray-500 font-semibold cursor-pointer"
                   >
                     🗑️ Xóa
                   </button>
