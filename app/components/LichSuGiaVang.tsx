@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import {
   LineChart,
@@ -27,48 +27,63 @@ export default function LichSuGiaVang() {
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState<"24h" | "7d" | "30d">("7d");
 
-  // 🟡 Lấy danh sách loại vàng, auto chọn cái đầu tiên
+  // 🟡 Lấy danh sách loại vàng, chọn mặc định cái đầu tiên
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase
+    const fetchDanhSachVang = async () => {
+      const { data, error } = await supabase
         .from("bang_gia_vang")
         .select("loai_vang")
         .order("id", { ascending: true });
+
+      if (error) {
+        console.error("Lỗi khi lấy danh sách vàng:", error.message);
+        return;
+      }
 
       if (data && data.length > 0) {
         const list = [...new Set(data.map((d) => d.loai_vang))];
         setDanhSachVang(list);
         setLoaiVang(list[0]); // 👉 chọn mặc định cái đầu tiên
       }
-    })();
+    };
+
+    fetchDanhSachVang();
   }, []);
 
-  // 🟢 Lấy lịch sử khi có loại vàng hoặc đổi range
+  // 🟢 Hàm fetch lịch sử có memo hóa để tránh re-render vô ích
+  const fetchLichSu = useCallback(
+    async (loai: string) => {
+      setLoading(true);
+
+      const now = new Date();
+      const fromDate = new Date();
+
+      if (range === "24h") fromDate.setDate(now.getDate() - 1);
+      else if (range === "7d") fromDate.setDate(now.getDate() - 7);
+      else if (range === "30d") fromDate.setDate(now.getDate() - 30);
+
+      const { data, error } = await supabase
+        .from("lich_su_bang_gia_vang")
+        .select("id, loai_vang, mua_vao, ban_ra, thay_doi_luc")
+        .eq("loai_vang", loai)
+        .gte("thay_doi_luc", fromDate.toISOString())
+        .order("thay_doi_luc", { ascending: true });
+
+      if (error) {
+        console.error("Lỗi khi lấy lịch sử:", error.message);
+      } else {
+        setLichSu(data || []);
+      }
+
+      setLoading(false);
+    },
+    [range]
+  );
+
+  // 🟣 Tự động gọi khi đổi loại vàng hoặc range
   useEffect(() => {
-    if (!loaiVang) return;
-    fetchLichSu(loaiVang);
-  }, [loaiVang, range]);
-
-  async function fetchLichSu(loai: string) {
-    setLoading(true);
-
-    // Giới hạn thời gian theo range
-    const now = new Date();
-    let fromDate = new Date();
-    if (range === "24h") fromDate.setDate(now.getDate() - 1);
-    else if (range === "7d") fromDate.setDate(now.getDate() - 7);
-    else if (range === "30d") fromDate.setDate(now.getDate() - 30);
-
-    const { data, error } = await supabase
-      .from("lich_su_bang_gia_vang")
-      .select("id, loai_vang, mua_vao, ban_ra, thay_doi_luc")
-      .eq("loai_vang", loai)
-      .gte("thay_doi_luc", fromDate.toISOString())
-      .order("thay_doi_luc", { ascending: true });
-
-    if (!error && data) setLichSu(data);
-    setLoading(false);
-  }
+    if (loaiVang) fetchLichSu(loaiVang);
+  }, [loaiVang, range, fetchLichSu]);
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-xl rounded-xl mt-10">
@@ -83,20 +98,21 @@ export default function LichSuGiaVang() {
           value={loaiVang}
           onChange={(e) => setLoaiVang(e.target.value)}
         >
-          {danhSachVang.length === 0 && (
+          {danhSachVang.length === 0 ? (
             <option value="">Đang tải danh sách...</option>
+          ) : (
+            danhSachVang.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))
           )}
-          {danhSachVang.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
         </select>
 
         <select
           className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
           value={range}
-          onChange={(e) => setRange(e.target.value as any)}
+          onChange={(e) => setRange(e.target.value as "24h" | "7d" | "30d")}
         >
           <option value="24h">24 giờ qua</option>
           <option value="7d">7 ngày qua</option>
@@ -133,7 +149,7 @@ export default function LichSuGiaVang() {
             <Tooltip
               labelFormatter={(v) => new Date(v).toLocaleString("vi-VN")}
               formatter={(value: number, name: string) => [
-                value.toLocaleString("vi-VN") + ".000 VNĐ/Chỉ",
+                value.toLocaleString("vi-VN") + " VNĐ/Chỉ",
                 name === "mua_vao" ? "Mua vào" : "Bán ra",
               ]}
             />
