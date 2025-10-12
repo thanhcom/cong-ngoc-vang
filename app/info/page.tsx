@@ -3,7 +3,7 @@ import Footer from "../components/Footer";
 import Slide from "../components/Slide";
 
 export const metadata = {
-  title: "Thông tin Vàng Bạc Công Ngọc - Niềm tin và chất lượng",
+  title: "Vàng Bạc Công Ngọc - Niềm tin và chất lượng",
   description:
     "Vàng Bạc Công Ngọc cung cấp nhẫn, dây chuyền, vòng tay… chất lượng cao, uy tín tại Hải Phòng.",
   openGraph: {
