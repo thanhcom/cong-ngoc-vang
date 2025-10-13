@@ -10,7 +10,9 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
+  TooltipProps,
 } from "recharts";
+import { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
 
 interface LichSuGia {
   id: number;
@@ -52,7 +54,6 @@ export default function LichSuGiaVang() {
   const fetchLichSu = useCallback(
     async (loai: string) => {
       setLoading(true);
-
       const now = new Date();
       const fromDate = new Date();
 
@@ -83,18 +84,19 @@ export default function LichSuGiaVang() {
   }, [loaiVang, range, fetchLichSu]);
 
   // -------- Custom Tooltip hiển thị mua + bán và delta so với điểm trước --------
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: TooltipProps<ValueType, NameType>) => {
     if (!active || !payload || payload.length === 0) return null;
 
-    // payload thường là mảng các series; mỗi phần tử có `.dataKey` và `.value` và `.payload` (original data object)
-    // Lấy giá hiện tại từ payload (tìm theo dataKey)
-    const muaPoint = payload.find((p: any) => p.dataKey === "mua_vao");
-    const banPoint = payload.find((p: any) => p.dataKey === "ban_ra");
+    const muaPoint = payload.find((p) => p.dataKey === "mua_vao");
+    const banPoint = payload.find((p) => p.dataKey === "ban_ra");
 
-    const currentMua = muaPoint ? muaPoint.value : undefined;
-    const currentBan = banPoint ? banPoint.value : undefined;
+    const currentMua = muaPoint?.value as number | undefined;
+    const currentBan = banPoint?.value as number | undefined;
 
-    // tìm index của label trong dữ liệu gốc để lấy điểm trước
     const idx = lichSu.findIndex((d) => d.thay_doi_luc === label);
     const prev = idx > 0 ? lichSu[idx - 1] : null;
 
@@ -102,8 +104,7 @@ export default function LichSuGiaVang() {
       v === undefined || v === null ? "-" : v.toLocaleString("vi-VN") + " đ";
 
     const formatDelta = (cur?: number, pre?: number) => {
-      if (cur === undefined || cur === null || pre === undefined || pre === null)
-        return "-";
+      if (cur === undefined || pre === undefined) return "-";
       const diff = Math.round(cur - pre);
       const sign = diff > 0 ? "+" : diff < 0 ? "" : "";
       return `${sign}${diff.toLocaleString("vi-VN")} đ`;
@@ -215,7 +216,6 @@ export default function LichSuGiaVang() {
               tick={{ fontSize: 12 }}
             />
 
-            {/* Dùng CustomTooltip */}
             <Tooltip content={<CustomTooltip />} />
 
             <Line
