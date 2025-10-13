@@ -27,8 +27,6 @@ export default function LichSuGiaVang() {
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState<"24h" | "7d" | "30d">("7d");
 
-  // ... (các phần code khác không thay đổi)
-
   useEffect(() => {
     const fetchDanhSachVang = async () => {
       const { data, error } = await supabase
@@ -83,6 +81,73 @@ export default function LichSuGiaVang() {
   useEffect(() => {
     if (loaiVang) fetchLichSu(loaiVang);
   }, [loaiVang, range, fetchLichSu]);
+
+  // -------- Custom Tooltip hiển thị mua + bán và delta so với điểm trước --------
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload || payload.length === 0) return null;
+
+    // payload thường là mảng các series; mỗi phần tử có `.dataKey` và `.value` và `.payload` (original data object)
+    // Lấy giá hiện tại từ payload (tìm theo dataKey)
+    const muaPoint = payload.find((p: any) => p.dataKey === "mua_vao");
+    const banPoint = payload.find((p: any) => p.dataKey === "ban_ra");
+
+    const currentMua = muaPoint ? muaPoint.value : undefined;
+    const currentBan = banPoint ? banPoint.value : undefined;
+
+    // tìm index của label trong dữ liệu gốc để lấy điểm trước
+    const idx = lichSu.findIndex((d) => d.thay_doi_luc === label);
+    const prev = idx > 0 ? lichSu[idx - 1] : null;
+
+    const formatV = (v?: number) =>
+      v === undefined || v === null ? "-" : v.toLocaleString("vi-VN") + " đ";
+
+    const formatDelta = (cur?: number, pre?: number) => {
+      if (cur === undefined || cur === null || pre === undefined || pre === null)
+        return "-";
+      const diff = Math.round(cur - pre);
+      const sign = diff > 0 ? "+" : diff < 0 ? "" : "";
+      return `${sign}${diff.toLocaleString("vi-VN")} đ`;
+    };
+
+    return (
+      <div
+        style={{
+          background: "#ffffff",
+          border: "1px solid rgba(0,0,0,0.08)",
+          borderRadius: 8,
+          padding: 10,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+          fontSize: 13,
+          minWidth: 180,
+        }}
+      >
+        <div style={{ marginBottom: 6, fontWeight: 700 }}>
+          {typeof label === "string"
+            ? new Date(label).toLocaleString("vi-VN")
+            : String(label)}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+          <div>
+            <div style={{ color: "#b45309", fontWeight: 600 }}>Mua vào</div>
+            <div>{formatV(currentMua)}</div>
+            <div style={{ color: "#6b7280", fontSize: 12 }}>
+              Δ {formatDelta(currentMua, prev?.mua_vao)}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ color: "#dc2626", fontWeight: 600 }}>Bán ra</div>
+            <div>{formatV(currentBan)}</div>
+            <div style={{ color: "#6b7280", fontSize: 12 }}>
+              Δ {formatDelta(currentBan, prev?.ban_ra)}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-xl rounded-xl mt-10">
@@ -144,28 +209,28 @@ export default function LichSuGiaVang() {
                 })
               }
             />
-            <YAxis />
-            {/* ✨ SỬA LỖI Ở ĐÂY ✨ */}
-            <Tooltip
-              labelFormatter={(v) => new Date(v).toLocaleString("vi-VN")}
-              formatter={(value: number, name: string) => [
-                value.toLocaleString("vi-VN") + " VNĐ/Chỉ",
-                name, // Chỉ cần trả về `name` là đủ, không cần điều kiện
-              ]}
+
+            <YAxis
+              domain={["dataMin - 200", "dataMax + 200"]}
+              tick={{ fontSize: 12 }}
             />
+
+            {/* Dùng CustomTooltip */}
+            <Tooltip content={<CustomTooltip />} />
+
             <Line
               type="monotone"
               dataKey="mua_vao"
               stroke="#f59e0b"
               strokeWidth={3}
-              name="Mua vào" // `name` này sẽ được truyền vào formatter
+              name="Mua vào"
             />
             <Line
               type="monotone"
               dataKey="ban_ra"
               stroke="#ef4444"
               strokeWidth={3}
-              name="Bán ra" // `name` này sẽ được truyền vào formatter
+              name="Bán ra"
             />
           </LineChart>
         </ResponsiveContainer>

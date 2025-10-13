@@ -111,17 +111,17 @@ export default function BangGiaRealtime() {
                   className="border-b transition-colors duration-500 hover:bg-yellow-200"
                 >
                   {/* Loại vàng */}
-                  <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
+                  <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
                     {row.loai_vang}
                   </td>
 
                   {/* Mua vào */}
-                  <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
+                  <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
                     {row.mua_vao.toLocaleString("vi-VN")} {row.don_vi}
                   </td>
 
                   {/* Bán ra */}
-                  <td className="py-3 px-4 text-lg md:text-3xl text-red-900 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
+                  <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
                     {row.ban_ra.toLocaleString("vi-VN")} {row.don_vi}
                   </td>
 
