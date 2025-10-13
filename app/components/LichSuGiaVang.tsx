@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import {
   LineChart,
@@ -20,34 +20,22 @@ interface LichSuGia {
   thay_doi_luc: string;
 }
 
-export default function LichSuGiaVang() {
-  const [lichSu, setLichSu] = useState<LichSuGia[]>([]);
-  const [loaiVang, setLoaiVang] = useState<string>("");
-  const [danhSachVang, setDanhSachVang] = useState<string[]>([]);
+interface Props {
+  initialLichSu: LichSuGia[];
+  initialDanhSachVang: string[];
+  initialLoaiVang: string;
+}
+
+export default function LichSuGiaVang({
+  initialLichSu,
+  initialDanhSachVang,
+  initialLoaiVang,
+}: Props) {
+  const [lichSu, setLichSu] = useState<LichSuGia[]>(initialLichSu);
+  const [loaiVang, setLoaiVang] = useState<string>(initialLoaiVang);
+  const [danhSachVang] = useState<string[]>(initialDanhSachVang);
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState<"24h" | "7d" | "30d">("7d");
-
-  useEffect(() => {
-    const fetchDanhSachVang = async () => {
-      const { data, error } = await supabase
-        .from("bang_gia_vang")
-        .select("loai_vang")
-        .order("id", { ascending: true });
-
-      if (error) {
-        console.error("Lỗi khi lấy danh sách vàng:", error.message);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const list = [...new Set(data.map((d) => d.loai_vang))];
-        setDanhSachVang(list);
-        setLoaiVang(list[0]);
-      }
-    };
-
-    fetchDanhSachVang();
-  }, []);
 
   const fetchLichSu = useCallback(
     async (loai: string) => {
@@ -59,19 +47,14 @@ export default function LichSuGiaVang() {
       else if (range === "7d") fromDate.setDate(now.getDate() - 7);
       else if (range === "30d") fromDate.setDate(now.getDate() - 30);
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("lich_su_bang_gia_vang")
-        .select("id, loai_vang, mua_vao, ban_ra, thay_doi_luc")
+        .select("*")
         .eq("loai_vang", loai)
         .gte("thay_doi_luc", fromDate.toISOString())
         .order("thay_doi_luc", { ascending: true });
 
-      if (error) {
-        console.error("Lỗi khi lấy lịch sử:", error.message);
-      } else {
-        setLichSu(data || []);
-      }
-
+      setLichSu(data || []);
       setLoading(false);
     },
     [range]
@@ -81,14 +64,15 @@ export default function LichSuGiaVang() {
     if (loaiVang) fetchLichSu(loaiVang);
   }, [loaiVang, range, fetchLichSu]);
 
-  // -------- Custom Tooltip --------
-  const CustomTooltip = (props: {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: {
     active?: boolean;
     payload?: { payload: LichSuGia }[];
     label?: string;
   }) => {
-    const { active, payload, label } = props;
-
     if (!active || !payload || payload.length === 0 || !label) return null;
 
     const data = payload[0]?.payload;
@@ -120,7 +104,6 @@ export default function LichSuGiaVang() {
         <div style={{ marginBottom: 6, fontWeight: 700 }}>
           {new Date(label).toLocaleString("vi-VN")}
         </div>
-
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
           <div>
             <div style={{ color: "#b45309", fontWeight: 600 }}>Mua vào</div>
@@ -129,7 +112,6 @@ export default function LichSuGiaVang() {
               Δ {formatDelta(data.mua_vao, prev?.mua_vao)}
             </div>
           </div>
-
           <div>
             <div style={{ color: "#dc2626", fontWeight: 600 }}>Bán ra</div>
             <div>{formatV(data.ban_ra)}</div>
@@ -141,7 +123,6 @@ export default function LichSuGiaVang() {
       </div>
     );
   };
-  // ---------------------------------------------------------------------------
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-xl rounded-xl mt-10">
@@ -156,15 +137,11 @@ export default function LichSuGiaVang() {
           value={loaiVang}
           onChange={(e) => setLoaiVang(e.target.value)}
         >
-          {danhSachVang.length === 0 ? (
-            <option value="">Đang tải danh sách...</option>
-          ) : (
-            danhSachVang.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))
-          )}
+          {danhSachVang.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
         </select>
 
         <select
@@ -178,10 +155,7 @@ export default function LichSuGiaVang() {
         </select>
       </div>
 
-      {loading && (
-        <p className="text-center text-gray-500">⏳ Đang tải dữ liệu...</p>
-      )}
-
+      {loading && <p className="text-center text-gray-500">⏳ Đang tải dữ liệu...</p>}
       {!loading && lichSu.length === 0 && loaiVang && (
         <p className="text-center text-gray-400 italic">
           Không có dữ liệu trong khoảng thời gian này.
@@ -203,25 +177,10 @@ export default function LichSuGiaVang() {
                 })
               }
             />
-            <YAxis
-              domain={["dataMin - 200", "dataMax + 200"]}
-              tick={{ fontSize: 12 }}
-            />
+            <YAxis domain={["dataMin - 200", "dataMax + 200"]} tick={{ fontSize: 12 }} />
             <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="mua_vao"
-              stroke="#f59e0b"
-              strokeWidth={3}
-              name="Mua vào"
-            />
-            <Line
-              type="monotone"
-              dataKey="ban_ra"
-              stroke="#ef4444"
-              strokeWidth={3}
-              name="Bán ra"
-            />
+            <Line type="monotone" dataKey="mua_vao" stroke="#f59e0b" strokeWidth={3} name="Mua vào" />
+            <Line type="monotone" dataKey="ban_ra" stroke="#ef4444" strokeWidth={3} name="Bán ra" />
           </LineChart>
         </ResponsiveContainer>
       )}

@@ -1,8 +1,11 @@
-// components/BangGiaRealtime.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
+import { Database } from "../../types/supabase";
+
+type BangGiaVang = Database["public"]["Tables"]["bang_gia_vang"]["Row"];
+
 
 interface GiaVang {
   id: number;
@@ -13,41 +16,45 @@ interface GiaVang {
   updated_at: string;
 }
 
-// Hàm hiển thị "time ago"
-function timeAgo(dateString: string) {
-  const now = new Date();
-  const updated = new Date(dateString);
-  const diff = Math.floor((now.getTime() - updated.getTime()) / 1000);
-
-  if (diff < 60) return `${diff} giây trước`;
+/** ⚡ Hàm hiển thị "time ago" nhanh gọn */
+function timeAgo(dateString: string): string {
+  const diff = (Date.now() - new Date(dateString).getTime()) / 1000;
+  if (diff < 60) return `${Math.floor(diff)} giây trước`;
   if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
   if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
-
-  const days = Math.floor(diff / 86400);
-  if (days < 7) return `${days} ngày trước`;
-  if (days < 30) return `${Math.floor(days / 7)} tuần trước`;
-  if (days < 365) return `${Math.floor(days / 30)} tháng trước`;
-  return `${Math.floor(days / 365)} năm trước`;
+  if (diff < 2592000) return `${Math.floor(diff / 86400)} ngày trước`;
+  if (diff < 31536000) return `${Math.floor(diff / 2592000)} tháng trước`;
+  return `${Math.floor(diff / 31536000)} năm trước`;
 }
 
-export default function BangGiaRealtime() {
-  const [bangGia, setBangGia] = useState<GiaVang[]>([]);
-  const [timeNow, setTimeNow] = useState(new Date());
+/** 🧩 Component chính */
+export default function BangGiaRealtime({ initialData = [] }: { initialData?: GiaVang[] }) {
+  const [bangGia, setBangGia] = useState<GiaVang[]>(initialData);
+  const [loading, setLoading] = useState(initialData.length === 0);
+  const [tick, setTick] = useState(0); // Cập nhật timeAgo mỗi phút
 
-  // Lấy dữ liệu ban đầu
+  /** 1️⃣ Lấy dữ liệu ban đầu nếu chưa có (SSR fallback + realtime ready) */
   useEffect(() => {
+    let mounted = true;
+
     const fetchData = async () => {
-      const { data, error } = await supabase
-        .from("bang_gia_vang")
-        .select("*")
-        .order("id", { ascending: true });
-      if (!error && data) setBangGia(data);
+      if (initialData.length === 0) {
+        const { data, error } = await supabase
+          .from("bang_gia_vang")
+          .select("*")
+          .order("id", { ascending: true });
+        if (!error && data && mounted) {
+          setBangGia(data);
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
     };
-    fetchData();
-  }, []);
 
-  // Realtime subscription
-  useEffect(() => {
+    fetchData();
+
+    /** 2️⃣ Đăng ký realtime cập nhật tự động */
     const channel = supabase
       .channel("realtime:bang_gia_vang")
       .on(
@@ -55,31 +62,45 @@ export default function BangGiaRealtime() {
         { event: "*", schema: "public", table: "bang_gia_vang" },
         (payload) => {
           setBangGia((prev) => {
-            if (payload.eventType === "UPDATE") {
-              return prev.map((r) =>
-                r.id === payload.new.id ? (payload.new as GiaVang) : r
-              );
+            switch (payload.eventType) {
+              case "UPDATE":
+                return prev.map((r) =>
+                  r.id === payload.new.id ? (payload.new as GiaVang) : r
+                );
+              case "INSERT":
+                return [...prev, payload.new as GiaVang];
+              case "DELETE":
+                return prev.filter((r) => r.id !== payload.old.id);
+              default:
+                return prev;
             }
-            if (payload.eventType === "INSERT") {
-              return [...prev, payload.new as GiaVang];
-            }
-            return prev;
           });
         }
       )
       .subscribe();
 
+    /** 3️⃣ Tick cập nhật "time ago" mỗi phút */
+    const interval = setInterval(() => setTick((t) => t + 1), 60000);
+
     return () => {
+      mounted = false;
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [initialData]);
 
-  // Cập nhật thời gian "time ago" mỗi giây
-  useEffect(() => {
-    const interval = setInterval(() => setTimeNow(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
+  /** ⚠️ Loading khi chưa có dữ liệu */
+  if (loading) {
+    return (
+      <section className="py-12 bg-yellow-50 text-center">
+        <p className="text-red-700 font-bold text-xl animate-pulse">
+          Đang tải bảng giá vàng hôm nay...
+        </p>
+      </section>
+    );
+  }
 
+  /** ✅ Render bảng giá */
   return (
     <section className="py-12 md:py-16 bg-yellow-50">
       <div className="container mx-auto px-4 md:px-12 text-center">
@@ -94,6 +115,7 @@ export default function BangGiaRealtime() {
             })}
           </span>
         </h3>
+
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white shadow-xl rounded-xl overflow-hidden text-base md:text-lg">
             <thead className="bg-red-700 text-white text-lg md:text-3xl font-bold">
@@ -105,39 +127,37 @@ export default function BangGiaRealtime() {
               </tr>
             </thead>
             <tbody>
-              {bangGia.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b transition-colors duration-500 hover:bg-yellow-200"
-                >
-                  {/* Loại vàng */}
-                  <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
-                    {row.loai_vang}
-                  </td>
+              {bangGia.map((row) => {
+                const isNew =
+                  Date.now() - new Date(row.updated_at).getTime() < 5000; // highlight trong 5s
 
-                  {/* Mua vào */}
-                  <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
-                    {row.mua_vao.toLocaleString("vi-VN")} {row.don_vi}
-                  </td>
-
-                  {/* Bán ra */}
-                  <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold tracking-wide shadow-md transition-transform duration-300 hover:scale-105">
-                    {row.ban_ra.toLocaleString("vi-VN")} {row.don_vi}
-                  </td>
-
-                  {/* Cập nhật */}
-                  <td
-                    className={`py-3 px-4 text-lg md:text-3xl text-yellow-400 font-extrabold tracking-wide shadow-md transition-colors duration-500 hover:text-yellow-600 cursor-default ${
-                      new Date(row.updated_at).getTime() > Date.now() - 5000
-                        ? "animate-pulse"
-                        : ""
+                return (
+                  <tr
+                    key={row.id}
+                    className={`border-b transition-colors duration-500 ${
+                      isNew
+                        ? "bg-yellow-100 animate-pulse"
+                        : "hover:bg-yellow-200"
                     }`}
-                    title={new Date(row.updated_at).toLocaleString()}
                   >
-                    {timeAgo(row.updated_at)}
-                  </td>
-                </tr>
-              ))}
+                    <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold">
+                      {row.loai_vang}
+                    </td>
+                    <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold">
+                      {row.mua_vao.toLocaleString("vi-VN")} {row.don_vi}
+                    </td>
+                    <td className="py-3 px-4 text-lg md:text-3xl text-red-700 font-extrabold">
+                      {row.ban_ra.toLocaleString("vi-VN")} {row.don_vi}
+                    </td>
+                    <td
+                      className="py-3 px-4 text-lg md:text-3xl text-yellow-500 font-extrabold cursor-default"
+                      title={new Date(row.updated_at).toLocaleString("vi-VN")}
+                    >
+                      {timeAgo(row.updated_at)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
