@@ -96,13 +96,13 @@ export default function LichSuGiaVang() {
     const prev = idx > 0 ? lichSu[idx - 1] : null;
 
     const formatV = (v?: number) =>
-      v == null ? "-" : v.toLocaleString("vi-VN") + " đ";
+      v == null ? "-" : v.toLocaleString("vi-VN") + " Nghìn VNĐ/Chỉ";
 
     const formatDelta = (cur?: number, pre?: number) => {
       if (cur == null || pre == null) return "-";
       const diff = Math.round(cur - pre);
       const sign = diff > 0 ? "+" : diff < 0 ? "" : "";
-      return `${sign}${diff.toLocaleString("vi-VN")} đ`;
+      return `${sign}${diff.toLocaleString("vi-VN")} Nghìn VNĐ/Chỉ`;
     };
 
     return (
