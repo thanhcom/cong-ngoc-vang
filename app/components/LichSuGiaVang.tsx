@@ -10,9 +10,7 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
-  TooltipProps,
 } from "recharts";
-import { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
 
 interface LichSuGia {
   id: number;
@@ -83,28 +81,25 @@ export default function LichSuGiaVang() {
     if (loaiVang) fetchLichSu(loaiVang);
   }, [loaiVang, range, fetchLichSu]);
 
-  // -------- Custom Tooltip hiển thị mua + bán và delta so với điểm trước --------
-  const CustomTooltip = ({
-    active,
-    payload,
-    label,
-  }: TooltipProps<ValueType, NameType>) => {
-    if (!active || !payload || payload.length === 0) return null;
+  // -------- Custom Tooltip --------
+  const CustomTooltip = (props: {
+    active?: boolean;
+    payload?: { payload: LichSuGia }[];
+    label?: string;
+  }) => {
+    const { active, payload, label } = props;
 
-    const muaPoint = payload.find((p) => p.dataKey === "mua_vao");
-    const banPoint = payload.find((p) => p.dataKey === "ban_ra");
+    if (!active || !payload || payload.length === 0 || !label) return null;
 
-    const currentMua = muaPoint?.value as number | undefined;
-    const currentBan = banPoint?.value as number | undefined;
-
-    const idx = lichSu.findIndex((d) => d.thay_doi_luc === label);
+    const data = payload[0]?.payload;
+    const idx = lichSu.findIndex((d) => d.thay_doi_luc === data.thay_doi_luc);
     const prev = idx > 0 ? lichSu[idx - 1] : null;
 
     const formatV = (v?: number) =>
-      v === undefined || v === null ? "-" : v.toLocaleString("vi-VN") + " đ";
+      v == null ? "-" : v.toLocaleString("vi-VN") + " đ";
 
     const formatDelta = (cur?: number, pre?: number) => {
-      if (cur === undefined || pre === undefined) return "-";
+      if (cur == null || pre == null) return "-";
       const diff = Math.round(cur - pre);
       const sign = diff > 0 ? "+" : diff < 0 ? "" : "";
       return `${sign}${diff.toLocaleString("vi-VN")} đ`;
@@ -123,25 +118,23 @@ export default function LichSuGiaVang() {
         }}
       >
         <div style={{ marginBottom: 6, fontWeight: 700 }}>
-          {typeof label === "string"
-            ? new Date(label).toLocaleString("vi-VN")
-            : String(label)}
+          {new Date(label).toLocaleString("vi-VN")}
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
           <div>
             <div style={{ color: "#b45309", fontWeight: 600 }}>Mua vào</div>
-            <div>{formatV(currentMua)}</div>
+            <div>{formatV(data.mua_vao)}</div>
             <div style={{ color: "#6b7280", fontSize: 12 }}>
-              Δ {formatDelta(currentMua, prev?.mua_vao)}
+              Δ {formatDelta(data.mua_vao, prev?.mua_vao)}
             </div>
           </div>
 
           <div>
             <div style={{ color: "#dc2626", fontWeight: 600 }}>Bán ra</div>
-            <div>{formatV(currentBan)}</div>
+            <div>{formatV(data.ban_ra)}</div>
             <div style={{ color: "#6b7280", fontSize: 12 }}>
-              Δ {formatDelta(currentBan, prev?.ban_ra)}
+              Δ {formatDelta(data.ban_ra, prev?.ban_ra)}
             </div>
           </div>
         </div>
@@ -210,14 +203,11 @@ export default function LichSuGiaVang() {
                 })
               }
             />
-
             <YAxis
               domain={["dataMin - 200", "dataMax + 200"]}
               tick={{ fontSize: 12 }}
             />
-
             <Tooltip content={<CustomTooltip />} />
-
             <Line
               type="monotone"
               dataKey="mua_vao"
