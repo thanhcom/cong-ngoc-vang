@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Slide from "../components/Slide";
 import Footer from "../components/Footer";
 import LichSuGiaVang from "../components/LichSuGiaVang";
-import { BangGiaVang, LichSuGiaVang as LichSuGia } from "../../types/supabase";
+import { LichSuGiaVang as LichSuGia } from "../../types/supabase";
 
 const supabaseServer = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,17 +16,21 @@ export const metadata = {
 };
 
 export default async function LichSuPage() {
-  // Lấy danh sách loại vàng
+  // ================= DANH SÁCH LOẠI VÀNG =================
   const { data: bangGia } = await supabaseServer
     .from("bang_gia_vang")
-    .select("loai_vang");
+    .select("id, loai_vang")
+    .order("id", { ascending: true }); // giữ thứ tự DB
 
-  const danhSachVang: string[] = Array.from(
-    new Set(bangGia?.map((d) => d.loai_vang) || [])
-  );
-  const defaultLoaiVang = danhSachVang[0] || "";
+  const danhSachVang: string[] = bangGia?.map((d) => d.loai_vang) || [];
 
-  // Lấy lịch sử 7 ngày đầu tiên
+  // Đặt default loại vàng rõ ràng
+  const defaultLoaiVang =
+    danhSachVang.find((v) => v === "Nhẫn Tròn Công Ngọc 99,99") ||
+    danhSachVang[0] ||
+    "";
+
+  // ================= LẤY LỊCH SỬ 7 NGÀY =================
   const fromDate = new Date();
   fromDate.setDate(fromDate.getDate() - 7);
 
@@ -35,7 +39,7 @@ export default async function LichSuPage() {
     .select("*")
     .eq("loai_vang", defaultLoaiVang)
     .gte("thay_doi_luc", fromDate.toISOString())
-    .order("thay_doi_luc", { ascending: true });
+    .order("id", { ascending: true });
 
   const lichSu: LichSuGia[] = (lichSuData || []) as LichSuGia[];
 

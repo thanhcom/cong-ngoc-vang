@@ -37,9 +37,11 @@ export default function LichSuGiaVang({
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState<"24h" | "7d" | "30d">("7d");
 
+  // ================= FETCH DỮ LIỆU =================
   const fetchLichSu = useCallback(
     async (loai: string) => {
       setLoading(true);
+
       const now = new Date();
       const fromDate = new Date();
 
@@ -52,18 +54,21 @@ export default function LichSuGiaVang({
         .select("*")
         .eq("loai_vang", loai)
         .gte("thay_doi_luc", fromDate.toISOString())
-        .order("thay_doi_luc", { ascending: true });
+        .order("id", { ascending: true });
 
-      setLichSu(data || []);
+      setLichSu((data || []).sort((a, b) => a.id - b.id));
       setLoading(false);
     },
     [range]
   );
 
   useEffect(() => {
-    if (loaiVang) fetchLichSu(loaiVang);
-  }, [loaiVang, range, fetchLichSu]);
+    if (loaiVang !== initialLoaiVang || range !== "7d") {
+      fetchLichSu(loaiVang);
+    }
+  }, [loaiVang, range, fetchLichSu, initialLoaiVang]);
 
+  // ================= TOOLTIP =================
   const CustomTooltip = ({
     active,
     payload,
@@ -76,7 +81,7 @@ export default function LichSuGiaVang({
     if (!active || !payload || payload.length === 0 || !label) return null;
 
     const data = payload[0]?.payload;
-    const idx = lichSu.findIndex((d) => d.thay_doi_luc === data.thay_doi_luc);
+    const idx = lichSu.findIndex((d) => d.id === data.id);
     const prev = idx > 0 ? lichSu[idx - 1] : null;
 
     const formatV = (v?: number) =>
@@ -124,6 +129,7 @@ export default function LichSuGiaVang({
     );
   };
 
+  // ================= RENDER =================
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-xl rounded-xl mt-10">
       <h2 className="text-2xl font-bold text-center text-yellow-700 mb-6">
@@ -179,8 +185,20 @@ export default function LichSuGiaVang({
             />
             <YAxis domain={["dataMin - 200", "dataMax + 200"]} tick={{ fontSize: 12 }} />
             <Tooltip content={<CustomTooltip />} />
-            <Line type="monotone" dataKey="mua_vao" stroke="#f59e0b" strokeWidth={3} name="Mua vào" />
-            <Line type="monotone" dataKey="ban_ra" stroke="#ef4444" strokeWidth={3} name="Bán ra" />
+            <Line
+              type="monotone"
+              dataKey="mua_vao"
+              stroke="#f59e0b"
+              strokeWidth={3}
+              name="Mua vào"
+            />
+            <Line
+              type="monotone"
+              dataKey="ban_ra"
+              stroke="#ef4444"
+              strokeWidth={3}
+              name="Bán ra"
+            />
           </LineChart>
         </ResponsiveContainer>
       )}
