@@ -1,3 +1,6 @@
+// app/lich-su/page.tsx
+export const dynamic = "force-dynamic"; // ⚡ ép fetch mới mỗi lần request
+
 import { createClient } from "@supabase/supabase-js";
 import Header from "../components/Header";
 import Slide from "../components/Slide";
@@ -5,6 +8,7 @@ import Footer from "../components/Footer";
 import LichSuGiaVang from "../components/LichSuGiaVang";
 import { LichSuGiaVang as LichSuGia } from "../../types/supabase";
 
+// Supabase server-side client (chạy trên server)
 const supabaseServer = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -13,14 +17,24 @@ const supabaseServer = createClient(
 export const metadata = {
   title: "Vàng Bạc Công Ngọc - Lịch sử giá vàng",
   description: "Khám phá lịch sử biến động giá vàng tại Công Ngọc.",
+  openGraph: {
+    title: "Lịch sử giá vàng tại Công Ngọc",
+    description: "Theo dõi biến động giá vàng theo thời gian thực tại Hải Phòng.",
+    url: "https://yourdomain.com/lich-su",
+    images: [{ url: "/images/logo.png", width: 800, height: 600 }],
+  },
 };
 
 export default async function LichSuPage() {
   // ================= DANH SÁCH LOẠI VÀNG =================
-  const { data: bangGia } = await supabaseServer
+  const { data: bangGia, error: errorBangGia } = await supabaseServer
     .from("bang_gia_vang")
     .select("id, loai_vang")
-    .order("id", { ascending: true }); // giữ thứ tự DB
+    .order("id", { ascending: true });
+
+  if (errorBangGia) {
+    console.error("Lỗi lấy danh sách vàng:", errorBangGia.message);
+  }
 
   const danhSachVang: string[] = bangGia?.map((d) => d.loai_vang) || [];
 
@@ -34,12 +48,16 @@ export default async function LichSuPage() {
   const fromDate = new Date();
   fromDate.setDate(fromDate.getDate() - 7);
 
-  const { data: lichSuData } = await supabaseServer
+  const { data: lichSuData, error: errorLichSu } = await supabaseServer
     .from("lich_su_bang_gia_vang")
     .select("*")
     .eq("loai_vang", defaultLoaiVang)
     .gte("thay_doi_luc", fromDate.toISOString())
     .order("id", { ascending: true });
+
+  if (errorLichSu) {
+    console.error("Lỗi lấy lịch sử:", errorLichSu.message);
+  }
 
   const lichSu: LichSuGia[] = (lichSuData || []) as LichSuGia[];
 
