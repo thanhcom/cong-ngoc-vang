@@ -41,7 +41,7 @@
 
 .headerCenter h1 {
   color: yellow;
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 900;
   margin: 0;
 }
@@ -59,7 +59,7 @@
 .table td {
   border: 2px solid black;
   padding: 15px;
-  font-size: 1.8rem; 
+  font-size: 2.5rem; 
   font-weight: 900;
   color: white;
   font-family: "Arial", sans-serif;
@@ -92,7 +92,7 @@
   padding: 10px 0;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 1.4rem;
+  font-size: 2.5rem;
 }
 
 .marquee span {

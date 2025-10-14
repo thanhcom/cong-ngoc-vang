@@ -13,48 +13,57 @@ interface BangGia {
 
 export default function BangGiaVangCongNgoc() {
   const [data, setData] = useState<BangGia[]>([]);
+  const [highlightId, setHighlightId] = useState<number | null>(null);
 
   useEffect(() => {
-    // 1. Lấy dữ liệu lần đầu
+    // Lấy dữ liệu lần đầu
     const fetchData = async () => {
       const { data } = await supabase.from("bang_gia_vang").select("*");
       if (data) setData(data);
     };
-    fetchData();
 
-    // 2. Subscribe Realtime
+    fetchData(); // gọi async bên trong effect, không return
+
+    // Subscribe realtime
     const subscription = supabase
       .channel("realtime-bang-gia")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "bang_gia_vang" },
         (payload) => {
-          // payload.eventType: INSERT | UPDATE | DELETE
-          // payload.new: dữ liệu mới (INSERT, UPDATE)
-          // payload.old: dữ liệu cũ (DELETE)
           setData((current) => {
+            let newData = [...current];
+            const newItem = payload.new as BangGia;
+            const oldItem = payload.old as BangGia;
+
             switch (payload.eventType) {
               case "INSERT":
-                return [...current, payload.new as BangGia];
+                newData.push(newItem);
+                setHighlightId(newItem.id);
+                break;
               case "UPDATE":
-                return current.map((item) =>
-                  item.id === (payload.new as BangGia).id
-                    ? (payload.new as BangGia)
-                    : item
+                newData = current.map((item) =>
+                  item.id === newItem.id ? newItem : item
                 );
+                setHighlightId(newItem.id);
+                break;
               case "DELETE":
-                return current.filter(
-                  (item) => item.id !== (payload.old as BangGia).id
-                );
-              default:
-                return current;
+                newData = current.filter((item) => item.id !== oldItem.id);
+                break;
             }
+
+            // Xóa highlight sau 1s
+            if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+              setTimeout(() => setHighlightId(null), 1000);
+            }
+
+            return newData;
           });
         }
       )
       .subscribe();
 
-    // Cleanup khi unmount
+    // Cleanup
     return () => {
       supabase.removeChannel(subscription);
     };
@@ -88,7 +97,10 @@ export default function BangGiaVangCongNgoc() {
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr key={item.id}>
+            <tr
+              key={item.id}
+              className={item.id === highlightId ? styles.highlightRow : ""}
+            >
               <td className={styles.loaiVang}>{item.loai_vang}</td>
               <td>{item.mua_vao.toLocaleString()}</td>
               <td>{item.ban_ra.toLocaleString()}</td>
