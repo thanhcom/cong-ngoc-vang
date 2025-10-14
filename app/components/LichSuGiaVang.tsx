@@ -41,7 +41,6 @@ export default function LichSuGiaVang({
   const fetchLichSu = useCallback(
     async (loai: string) => {
       setLoading(true);
-
       const now = new Date();
       const fromDate = new Date();
 
@@ -49,24 +48,24 @@ export default function LichSuGiaVang({
       else if (range === "7d") fromDate.setDate(now.getDate() - 7);
       else if (range === "30d") fromDate.setDate(now.getDate() - 30);
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("lich_su_bang_gia_vang")
         .select("*")
         .eq("loai_vang", loai)
         .gte("thay_doi_luc", fromDate.toISOString())
         .order("id", { ascending: true });
 
+      if (error) console.error("Lỗi load dữ liệu:", error);
       setLichSu((data || []).sort((a, b) => a.id - b.id));
       setLoading(false);
     },
     [range]
   );
 
+  // ================= LOAD DỮ LIỆU KHI ĐỔI LOẠI VÀNG HOẶC RANGE =================
   useEffect(() => {
-    if (loaiVang !== initialLoaiVang || range !== "7d") {
-      fetchLichSu(loaiVang);
-    }
-  }, [loaiVang, range, fetchLichSu, initialLoaiVang]);
+    fetchLichSu(loaiVang);
+  }, [loaiVang, range, fetchLichSu]);
 
   // ================= TOOLTIP =================
   const CustomTooltip = ({
@@ -79,7 +78,6 @@ export default function LichSuGiaVang({
     label?: string;
   }) => {
     if (!active || !payload || payload.length === 0 || !label) return null;
-
     const data = payload[0]?.payload;
     const idx = lichSu.findIndex((d) => d.id === data.id);
     const prev = idx > 0 ? lichSu[idx - 1] : null;
@@ -141,7 +139,14 @@ export default function LichSuGiaVang({
         <select
           className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
           value={loaiVang}
-          onChange={(e) => setLoaiVang(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setLoaiVang(value);
+            if (value === loaiVang) {
+              // ✅ Nếu chọn lại chính item hiện tại → vẫn reload dữ liệu
+              fetchLichSu(value);
+            }
+          }}
         >
           {danhSachVang.map((v) => (
             <option key={v} value={v}>
