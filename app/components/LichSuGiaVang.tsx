@@ -89,7 +89,16 @@ export default function LichSuGiaVang({
       if (cur == null || pre == null) return "-";
       const diff = Math.round(cur - pre);
       const sign = diff > 0 ? "+" : diff < 0 ? "" : "";
-      return `${sign}${diff.toLocaleString("vi-VN")} Nghìn VNĐ/Chỉ`;
+      const icon = diff > 0 ? "🔺" : diff < 0 ? "🔻" : "⏺️";
+      const color =
+        diff > 0 ? "#16a34a" : diff < 0 ? "#dc2626" : "#6b7280"; // xanh, đỏ, xám
+
+      return (
+        <span style={{ color, fontWeight: 600 }}>
+          {icon} {sign}
+          {Math.abs(diff).toLocaleString("vi-VN")} Nghìn VNĐ/Chỉ
+        </span>
+      );
     };
 
     return (
@@ -111,16 +120,12 @@ export default function LichSuGiaVang({
           <div>
             <div style={{ color: "#b45309", fontWeight: 600 }}>Mua vào</div>
             <div>{formatV(data.mua_vao)}</div>
-            <div style={{ color: "#6b7280", fontSize: 12 }}>
-              Δ {formatDelta(data.mua_vao, prev?.mua_vao)}
-            </div>
+            <div style={{ fontSize: 12 }}>{formatDelta(data.mua_vao, prev?.mua_vao)}</div>
           </div>
           <div>
             <div style={{ color: "#dc2626", fontWeight: 600 }}>Bán ra</div>
             <div>{formatV(data.ban_ra)}</div>
-            <div style={{ color: "#6b7280", fontSize: 12 }}>
-              Δ {formatDelta(data.ban_ra, prev?.ban_ra)}
-            </div>
+            <div style={{ fontSize: 12 }}>{formatDelta(data.ban_ra, prev?.ban_ra)}</div>
           </div>
         </div>
       </div>
