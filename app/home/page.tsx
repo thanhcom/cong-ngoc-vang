@@ -4,7 +4,6 @@ import Footer from "../components/Footer";
 import Slide from "../components/Slide";
 import { BangGiaRealtimeWrapper } from "./BangGiaClient";
 import { createClient } from "@supabase/supabase-js";
-import { Database } from "../../types/supabase";
 
 export const metadata = {
   title: "Vàng Bạc Công Ngọc - Trang chủ",
