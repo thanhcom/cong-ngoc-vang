@@ -8,15 +8,15 @@ interface BangGia {
   loai_vang: string;
   mua_vao: number;
   ban_ra: number;
-  don_vi?: string;
+  don_vi?: string; // giữ để hiển thị giao diện
   updated_at?: string;
 }
 
-// Hàm tính time ago kiểu Facebook
+// 🔹 Hàm tính "time ago"
 function timeAgo(dateString: string) {
   const now = new Date();
   const past = new Date(dateString);
-  const diff = (now.getTime() - past.getTime()) / 1000; // giây
+  const diff = (now.getTime() - past.getTime()) / 1000;
 
   if (diff < 60) return `${Math.floor(diff)} giây trước`;
   if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
@@ -27,23 +27,21 @@ function timeAgo(dateString: string) {
 }
 
 export default function BangGiaVangManager() {
-  // Đổi title trang
-    useEffect(() => {
+  useEffect(() => {
     document.title = "💎 Quản lý Bảng giá vàng - Công Ngọc";
   }, []);
-
 
   const [rows, setRows] = useState<BangGia[]>([]);
   const [formData, setFormData] = useState<BangGia>({
     loai_vang: "",
     mua_vao: 0,
     ban_ra: 0,
-    don_vi: "Nghìn VNĐ/chỉ",
+    don_vi: "Nghìn VNĐ/chỉ", // chỉ để hiển thị
   });
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [, setTick] = useState(0); // dùng để rerender mỗi giây
+  const [, setTick] = useState(0);
 
-  // 🔹 Load dữ liệu + realtime
+  // 🔹 Load + realtime
   useEffect(() => {
     loadData();
 
@@ -61,54 +59,97 @@ export default function BangGiaVangManager() {
     };
   }, []);
 
-  // 🔹 Timer để rerender mỗi giây
+  // 🔹 Cập nhật "time ago"
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTick((t) => t + 1);
-    }, 1000);
+    const interval = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(interval);
   }, []);
 
   const loadData = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("bang_gia_vang")
       .select("*")
       .order("updated_at", { ascending: false });
-    setRows(data || []);
+
+    if (error) {
+      console.error("❌ Lỗi load dữ liệu:", error.message);
+      alert("Không thể tải dữ liệu: " + error.message);
+    } else {
+      // Gán đơn vị mặc định để hiển thị
+      const withDonVi = (data || []).map((r) => ({
+        ...r,
+        don_vi: "Nghìn VNĐ/chỉ",
+      }));
+      setRows(withDonVi);
+    }
   };
-  
+
+  // 🔹 Thêm / Cập nhật
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (editingId) {
-      await supabase
-        .from("bang_gia_vang")
-        .update({
-          loai_vang: formData.loai_vang,
-          mua_vao: formData.mua_vao,
-          ban_ra: formData.ban_ra,
-          don_vi: formData.don_vi,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", editingId);
-      setEditingId(null);
-    } else {
-      await supabase
-        .from("bang_gia_vang")
-        .insert([{ ...formData, updated_at: new Date().toISOString() }]);
-    }
+    try {
+      if (editingId) {
+        const { error } = await supabase
+          .from("bang_gia_vang")
+          .update({
+            loai_vang: formData.loai_vang,
+            mua_vao: formData.mua_vao,
+            ban_ra: formData.ban_ra,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", editingId);
 
-    setFormData({ loai_vang: "", mua_vao: 0, ban_ra: 0, don_vi: "Nghìn VNĐ/chỉ" });
+        if (error) throw error;
+        alert("✅ Cập nhật thành công!");
+        setEditingId(null);
+      } else {
+        const { error } = await supabase.from("bang_gia_vang").insert([
+          {
+            loai_vang: formData.loai_vang,
+            mua_vao: formData.mua_vao,
+            ban_ra: formData.ban_ra,
+            updated_at: new Date().toISOString(),
+          },
+        ]);
+
+        if (error) throw error;
+        alert("✅ Thêm mới thành công!");
+      }
+
+      setFormData({
+        loai_vang: "",
+        mua_vao: 0,
+        ban_ra: 0,
+        don_vi: "Nghìn VNĐ/chỉ",
+      });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("❌ Lỗi Supabase:", err.message);
+        alert("❌ Lỗi khi lưu dữ liệu: " + err.message);
+      } else {
+        console.error("❌ Lỗi Supabase không xác định:", err);
+        alert("❌ Có lỗi xảy ra, vui lòng thử lại.");
+      }
+    }
   };
 
+  // 🔹 Sửa
   const handleEdit = (row: BangGia) => {
     setEditingId(row.id!);
-    setFormData(row);
+    setFormData({ ...row });
   };
 
+  // 🔹 Xóa
   const handleDelete = async (id: number) => {
     if (confirm("Bạn có chắc muốn xóa không?")) {
-      await supabase.from("bang_gia_vang").delete().eq("id", id);
+      const { error } = await supabase.from("bang_gia_vang").delete().eq("id", id);
+      if (error) {
+        console.error("❌ Lỗi xóa:", error.message);
+        alert("Lỗi khi xóa: " + error.message);
+      } else {
+        alert("🗑️ Đã xóa thành công!");
+      }
     }
   };
 
