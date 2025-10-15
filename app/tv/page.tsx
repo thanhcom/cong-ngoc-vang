@@ -16,13 +16,17 @@ export default function BangGiaVangCongNgoc() {
   const [highlightId, setHighlightId] = useState<number | null>(null);
 
   useEffect(() => {
-    // Lấy dữ liệu lần đầu
+    // Lấy dữ liệu lần đầu, sắp xếp theo id
     const fetchData = async () => {
-      const { data } = await supabase.from("bang_gia_vang").select("*");
+      const { data } = await supabase
+        .from("bang_gia_vang")
+        .select("*")
+        .order("id", { ascending: true });
+
       if (data) setData(data);
     };
 
-    fetchData(); // gọi async bên trong effect, không return
+    fetchData();
 
     // Subscribe realtime
     const subscription = supabase
@@ -52,6 +56,9 @@ export default function BangGiaVangCongNgoc() {
                 break;
             }
 
+            // Sắp xếp lại theo id
+            newData.sort((a, b) => a.id - b.id);
+
             // Xóa highlight sau 1s
             if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
               setTimeout(() => setHighlightId(null), 1000);
@@ -63,7 +70,6 @@ export default function BangGiaVangCongNgoc() {
       )
       .subscribe();
 
-    // Cleanup
     return () => {
       supabase.removeChannel(subscription);
     };
