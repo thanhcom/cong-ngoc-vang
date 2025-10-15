@@ -13,8 +13,21 @@ const images = [
 ];
 
 export const metadata = {
-  title: "Hình ảnh Vàng Bạc Công Ngọc - Sang trọng & Tinh tế",
-  description: "Khám phá bộ sưu tập hình ảnh vàng bạc, nhẫn, dây chuyền… chất lượng cao tại Hải Phòng.",
+  title: "Vàng Bạc Công Ngọc - Hình ảnh Vàng Bạc Công Ngọc - Sang trọng & Tinh tế",
+  description:
+    "Vàng Bạc Công Ngọc cung cấp nhẫn, dây chuyền, vòng tay… chất lượng cao, uy tín .",
+  openGraph: {
+    title: "Hình ảnh Vàng Bạc Công Ngọc - Sang trọng & Tinh tế",
+    description: "Sản phẩm vàng bạc chất lượng cao, uy tín.",
+    url: "https://vangbaccongngoc.com/product",
+    images: [
+      {
+        url: "/img/5.jpeg",
+        width: 800,
+        height: 600,
+      },
+    ],
+  },
 };
 
 export default function GalleryPage() {
