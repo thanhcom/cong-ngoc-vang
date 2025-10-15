@@ -1,16 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 
 
 export default function LoginPage() {
-  // Đổi title trang
-      useEffect(() => {
-      document.title = "🔒 Đăng nhập - Công Ngọc";
-    }, []);
-
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();

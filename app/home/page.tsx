@@ -8,12 +8,18 @@ import { createClient } from "@supabase/supabase-js";
 export const metadata = {
   title: "Vàng Bạc Công Ngọc - Trang chủ",
   description:
-    "Vàng Bạc Công Ngọc cung cấp nhẫn, dây chuyền, vòng tay… chất lượng cao, uy tín tại Hải Phòng.",
+    "Vàng Bạc Công Ngọc cung cấp nhẫn, dây chuyền, vòng tay… chất lượng cao, uy tín .",
   openGraph: {
     title: "Thông tin Vàng Bạc Công Ngọc",
-    description: "Sản phẩm vàng bạc chất lượng cao, uy tín tại Hải Phòng.",
-    url: "https://yourdomain.com",
-    images: [{ url: "/images/logo.png", width: 800, height: 600 }],
+    description: "Sản phẩm vàng bạc chất lượng cao, uy tín.",
+    url: "https://vangbaccongngoc.com/home",
+    images: [
+      {
+        url: "/img/5.jpeg",
+        width: 800,
+        height: 600,
+      },
+    ],
   },
 };
 

@@ -16,12 +16,19 @@ const supabaseServer = createClient(
 
 export const metadata = {
   title: "Vàng Bạc Công Ngọc - Lịch sử giá vàng",
-  description: "Khám phá lịch sử biến động giá vàng tại Công Ngọc.",
+  description:
+    "Khám phá lịch sử biến động giá vàng tại Công Ngọc.",
   openGraph: {
     title: "Lịch sử giá vàng tại Công Ngọc",
-    description: "Theo dõi biến động giá vàng theo thời gian thực tại Hải Phòng.",
-    url: "https://yourdomain.com/lich-su",
-    images: [{ url: "/images/logo.png", width: 800, height: 600 }],
+    description: "Theo dõi biến động giá vàng theo thời gian thực tại Vàng Bạc Công Ngọc.",
+    url: "https://vangbaccongngoc.com/history",
+    images: [
+      {
+        url: "/img/5.jpeg",
+        width: 800,
+        height: 600,
+      },
+    ],
   },
 };
 

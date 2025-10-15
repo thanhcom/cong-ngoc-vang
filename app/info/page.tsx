@@ -5,14 +5,14 @@ import Slide from "../components/Slide";
 export const metadata = {
   title: "Vàng Bạc Công Ngọc - Niềm tin và chất lượng",
   description:
-    "Vàng Bạc Công Ngọc cung cấp nhẫn, dây chuyền, vòng tay… chất lượng cao, uy tín tại Hải Phòng.",
+    "Vàng Bạc Công Ngọc cung cấp nhẫn, dây chuyền, vòng tay… chất lượng cao, uy tín .",
   openGraph: {
     title: "Thông tin Vàng Bạc Công Ngọc",
-    description: "Sản phẩm vàng bạc chất lượng cao, uy tín tại Hải Phòng.",
-    url: "https://yourdomain.com/info",
+    description: "Sản phẩm vàng bạc chất lượng cao, uy tín.",
+    url: "https://vangbaccongngoc.com/info",
     images: [
       {
-        url: "/images/logo.png",
+        url: "/img/5.jpeg",
         width: 800,
         height: 600,
       },

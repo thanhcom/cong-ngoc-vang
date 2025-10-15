@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://vangbaccongngoc.com
+
+# Sitemaps
+Sitemap: https://vangbaccongngoc.com/sitemap.xml
