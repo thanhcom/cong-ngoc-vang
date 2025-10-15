@@ -123,9 +123,8 @@ export default function BangGiaVangCongNgoc() {
               {index === 0 && (
                 <td className={styles.lienHe} rowSpan={data.length}>
                   <div className={styles.contactBox}>
-                    <div>07.08.40.9999</div>
-                    <div>09.888.27575</div>
-                    <div>098.777.4545</div>
+                    <div>0904 588 222</div>
+                    <div>0904 588 222</div>
                   </div>
                 </td>
               )}
