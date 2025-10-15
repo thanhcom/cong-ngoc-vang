@@ -154,15 +154,15 @@ export default function BangGiaVangManager() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 text-red-700 text-center">
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-red-700 text-center">
         💎 Quản lý Bảng giá vàng - Công Ngọc
       </h2>
 
       {/* ===== FORM ===== */}
       <form
         onSubmit={handleSubmit}
-        className="bg-red-50 p-5 rounded-2xl shadow-lg border border-red-200 mb-6 space-y-3"
+        className="bg-red-50 p-4 sm:p-5 rounded-2xl shadow-lg border border-red-200 mb-6 space-y-3 text-sm sm:text-base"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input
@@ -173,7 +173,7 @@ export default function BangGiaVangManager() {
               setFormData({ ...formData, loai_vang: e.target.value })
             }
             required
-            className="border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none"
+            className="border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none text-sm sm:text-base"
           />
           <input
             type="number"
@@ -183,7 +183,7 @@ export default function BangGiaVangManager() {
               setFormData({ ...formData, mua_vao: Number(e.target.value) })
             }
             required
-            className="border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none"
+            className="border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none text-sm sm:text-base"
           />
           <input
             type="number"
@@ -193,7 +193,7 @@ export default function BangGiaVangManager() {
               setFormData({ ...formData, ban_ra: Number(e.target.value) })
             }
             required
-            className="border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none"
+            className="border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none text-sm sm:text-base"
           />
           <input
             type="text"
@@ -202,13 +202,13 @@ export default function BangGiaVangManager() {
             onChange={(e) =>
               setFormData({ ...formData, don_vi: e.target.value })
             }
-            className="border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none"
+            className="border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none text-sm sm:text-base"
           />
         </div>
 
         <button
           type="submit"
-          className={`w-full py-2 font-bold rounded-lg transition cursor-pointer ${
+          className={`w-full py-2 font-bold rounded-lg transition cursor-pointer text-sm sm:text-base ${
             editingId
               ? "bg-red-600 hover:bg-red-700 text-white"
               : "bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white"
@@ -219,15 +219,15 @@ export default function BangGiaVangManager() {
       </form>
 
       {/* ===== TABLE ===== */}
-      <div className="overflow-x-auto shadow-lg rounded-xl border border-red-200">
+      <div className="overflow-x-auto shadow-lg rounded-xl border border-red-200 text-xs sm:text-sm">
         <table className="min-w-full text-center">
           <thead>
             <tr className="bg-gradient-to-r from-red-600 to-red-700 text-white">
-              <th className="py-3 px-4">Loại vàng</th>
-              <th className="py-3 px-4">Mua vào</th>
-              <th className="py-3 px-4">Bán ra</th>
-              <th className="py-3 px-4">Cập nhật</th>
-              <th className="py-3 px-4">Hành động</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-4">Loại vàng</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-4">Mua vào</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-4">Bán ra</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-4">Cập nhật</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-4">Hành động</th>
             </tr>
           </thead>
           <tbody className="bg-white">
@@ -236,30 +236,30 @@ export default function BangGiaVangManager() {
                 key={r.id}
                 className="border-b hover:bg-red-50 transition-colors"
               >
-                <td className="py-2 px-4 font-semibold text-red-700">
+                <td className="py-2 px-2 sm:px-4 font-semibold text-red-700">
                   {r.loai_vang}
                 </td>
-                <td className="py-2 px-4 text-gray-700">
+                <td className="py-2 px-2 sm:px-4 text-gray-700">
                   {r.mua_vao.toLocaleString()} {r.don_vi}
                 </td>
-                <td className="py-2 px-4 text-gray-700">
+                <td className="py-2 px-2 sm:px-4 text-gray-700">
                   {r.ban_ra.toLocaleString()} {r.don_vi}
                 </td>
-                <td className="py-2 px-4 text-sm text-yellow-500 font-semibold">
+                <td className="py-2 px-2 sm:px-4 text-yellow-600 font-semibold">
                   {r.updated_at ? timeAgo(r.updated_at) : "-"}
                 </td>
-                <td className="py-2 px-4 flex justify-center space-x-2">
+                <td className="py-2 px-2 sm:px-4 flex justify-center space-x-2">
                   <button
                     onClick={() => handleEdit(r)}
                     className="text-red-600 font-semibold cursor-pointer"
                   >
-                    ✏️ Sửa
+                    ✏️
                   </button>
                   <button
                     onClick={() => handleDelete(r.id!)}
                     className="text-gray-500 font-semibold cursor-pointer"
                   >
-                    🗑️ Xóa
+                    🗑️
                   </button>
                 </td>
               </tr>
