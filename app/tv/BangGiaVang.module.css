@@ -1,9 +1,9 @@
 .container {
   background-color: #b50000;
   color: yellow;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  width: 100%;        /* ✅ thay 100vw */
+  min-height: 100vh;  /* ✅ thay height cố định */
+  overflow-x: hidden; /* ✅ chỉ ẩn tràn ngang, cho phép cuộn dọc */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -12,11 +12,13 @@
 /* ===== HEADER ===== */
 .header {
   display: flex;
-  justify-content: center; /* căn giữa tiêu đề theo ngang */
-  align-items: center;     /* căn giữa theo dọc */
+  justify-content: center;
+  align-items: center;
   background-color: #cc0000;
   padding: 10px 30px;
-  position: relative;      /* để headerLeft không làm lệch headerCenter */
+  position: relative;
+  flex-wrap: wrap; /* Cho phép header co lại khi màn hình nhỏ */
+  text-align: center;
 }
 
 .headerLeft {
@@ -25,8 +27,8 @@
   font-size: 1rem;
   line-height: 1.4;
   font-weight: bold;
-  position: absolute;      /* để không chiếm không gian headerCenter */
-  left: 30px;              /* cùng padding với header */
+  position: absolute;
+  left: 30px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -37,6 +39,7 @@
 
 .headerCenter {
   text-align: center;
+  flex: 1;
 }
 
 .headerCenter h1 {
@@ -53,16 +56,18 @@
   text-align: center;
   background-color: red;
   flex: 1;
+  table-layout: fixed; /* Giúp cột co giãn đều, tránh tràn */
 }
 
 .table th,
 .table td {
   border: 2px solid black;
   padding: 15px;
-  font-size: 2.5rem; 
+  font-size: 2rem;
   font-weight: 900;
   color: white;
   font-family: "Arial", sans-serif;
+  word-wrap: break-word; /* Ngăn chữ bị tràn */
 }
 
 .table th {
@@ -82,6 +87,12 @@
   background-color: #002e91;
   border-left: 3px solid black;
   white-space: pre-line;
+}
+
+.contactBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* ===== CHỮ CHẠY ===== */
@@ -110,10 +121,89 @@
   }
 }
 
-/* Tự co giãn full màn hình */
+/* ===== TOÀN MÀN HÌNH ===== */
 html,
 body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+.dateText {
+  font-size: 1.3rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ======================
+   🔹 Responsive Adjustments
+   ====================== */
+
+/* Tablet (<= 1024px) */
+@media (max-width: 1024px) {
+  .headerCenter h1 {
+    font-size: 2.5rem;
+  }
+  .table th,
+  .table td {
+    font-size: 1.6rem;
+    padding: 10px;
+  }
+  .lienHe {
+    font-size: 1.5rem;
+  }
+  .marquee {
+    font-size: 2rem;
+  }
+}
+
+/* Điện thoại ngang (<= 768px) */
+@media (max-width: 768px) {
+  .header {
+    padding: 8px 15px;
+  }
+  .headerLeft {
+    position: static;
+    transform: none;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .headerCenter h1 {
+    font-size: 2rem;
+  }
+  .companyName {
+    font-size: 1rem;
+  }
+  .table th,
+  .table td {
+    font-size: 1.3rem;
+    padding: 8px;
+  }
+  .lienHe {
+    font-size: 1.2rem;
+  }
+  .marquee {
+    font-size: 1.8rem;
+  }
+}
+
+/* Điện thoại nhỏ (<= 480px) */
+@media (max-width: 480px) {
+  .headerCenter h1 {
+    font-size: 1.5rem;
+  }
+  .dateText {
+    font-size: 1rem;
+  }
+  .table th,
+  .table td {
+    font-size: 1rem;
+    padding: 6px;
+  }
+  .lienHe {
+    font-size: 1rem;
+  }
+  .marquee {
+    font-size: 1.3rem;
+  }
 }
