@@ -15,7 +15,7 @@ export const metadata = {
     url: "https://vangbaccongngoc.com/home",
     images: [
       {
-        url: "/img/5.jpeg",
+        url: "https://vangbaccongngoc.com/img/5.jpeg",
         width: 800,
         height: 600,
       },

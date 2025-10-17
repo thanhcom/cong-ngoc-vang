@@ -35,7 +35,7 @@ export default function LichSuGiaVang({
   const [loaiVang, setLoaiVang] = useState<string>(initialLoaiVang);
   const [danhSachVang] = useState<string[]>(initialDanhSachVang);
   const [loading, setLoading] = useState(false);
-  const [range, setRange] = useState<"24h" | "7d" | "30d">("7d");
+  const [range, setRange] = useState<"24h" | "7d" | "30d">("24h");
 
   // ================= FETCH DỮ LIỆU =================
   const fetchLichSu = useCallback(
