@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 
 
@@ -20,7 +21,12 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
+          // const { data, error } = await supabase.auth.signInWithPassword({
+          //   email: "anhchang00@gmail.com",
+          //   password: "laodaicaha",
+          // });
       router.push("/update");
+
     } else {
       setError("Sai mật khẩu!");
     }
