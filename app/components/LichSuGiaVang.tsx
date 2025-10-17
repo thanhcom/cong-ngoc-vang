@@ -90,8 +90,7 @@ export default function LichSuGiaVang({
       const diff = Math.round(cur - pre);
       const sign = diff > 0 ? "+" : diff < 0 ? "" : "";
       const icon = diff > 0 ? "🔺" : diff < 0 ? "🔻" : "⏺️";
-      const color =
-        diff > 0 ? "#16a34a" : diff < 0 ? "#dc2626" : "#6b7280"; // xanh, đỏ, xám
+      const color = diff > 0 ? "#16a34a" : diff < 0 ? "#dc2626" : "#6b7280"; // xanh, đỏ, xám
 
       return (
         <span style={{ color, fontWeight: 600 }}>
@@ -116,16 +115,22 @@ export default function LichSuGiaVang({
         <div style={{ marginBottom: 6, fontWeight: 700 }}>
           {new Date(label).toLocaleString("vi-VN")}
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+        <div
+          style={{ display: "flex", justifyContent: "space-between", gap: 8 }}
+        >
           <div>
             <div style={{ color: "#b45309", fontWeight: 600 }}>Mua vào</div>
             <div>{formatV(data.mua_vao)}</div>
-            <div style={{ fontSize: 12 }}>{formatDelta(data.mua_vao, prev?.mua_vao)}</div>
+            <div style={{ fontSize: 12 }}>
+              {formatDelta(data.mua_vao, prev?.mua_vao)}
+            </div>
           </div>
           <div>
             <div style={{ color: "#dc2626", fontWeight: 600 }}>Bán ra</div>
             <div>{formatV(data.ban_ra)}</div>
-            <div style={{ fontSize: 12 }}>{formatDelta(data.ban_ra, prev?.ban_ra)}</div>
+            <div style={{ fontSize: 12 }}>
+              {formatDelta(data.ban_ra, prev?.ban_ra)}
+            </div>
           </div>
         </div>
       </div>
@@ -171,7 +176,9 @@ export default function LichSuGiaVang({
         </select>
       </div>
 
-      {loading && <p className="text-center text-gray-500">⏳ Đang tải dữ liệu...</p>}
+      {loading && (
+        <p className="text-center text-gray-500">⏳ Đang tải dữ liệu...</p>
+      )}
       {!loading && lichSu.length === 0 && loaiVang && (
         <p className="text-center text-gray-400 italic">
           Không có dữ liệu trong khoảng thời gian này.
@@ -193,7 +200,10 @@ export default function LichSuGiaVang({
                 })
               }
             />
-            <YAxis domain={["dataMin - 200", "dataMax + 200"]} tick={{ fontSize: 12 }} />
+            <YAxis
+              domain={["dataMin - 200", "dataMax + 200"]}
+              tick={{ fontSize: 12 }}
+            />
             <Tooltip content={<CustomTooltip />} />
             <Line
               type="monotone"
@@ -201,6 +211,7 @@ export default function LichSuGiaVang({
               stroke="#f59e0b"
               strokeWidth={3}
               name="Mua vào"
+              dot={range === "24h"} // ✅ chỉ hiển thị chấm khi là 24h
             />
             <Line
               type="monotone"
@@ -208,6 +219,7 @@ export default function LichSuGiaVang({
               stroke="#ef4444"
               strokeWidth={3}
               name="Bán ra"
+              dot={range === "24h"} // ✅ tương tự
             />
           </LineChart>
         </ResponsiveContainer>
